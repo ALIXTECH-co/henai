@@ -1,0 +1,8 @@
+gradio>=5.0,<7
+diffusers>=0.32,<1
+transformers>=4.44,<6
+accelerate>=1.0,<2
+safetensors>=0.4,<1
+sentencepiece>=0.2,<1
+protobuf>=4,<7
+pytest>=8,<10
