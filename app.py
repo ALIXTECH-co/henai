@@ -7,6 +7,7 @@ import threading
 import uuid
 import gradio as gr
 from henai.core import generate, validate
+from henai.presets import PRESETS, get_preset
 
 OUTPUT_DIR = Path(os.environ.get("HENAI_OUTPUT_DIR", "outputs"))
 GENERATION_LOCK = threading.Lock()
@@ -39,6 +40,7 @@ with gr.Blocks(title="HENAI · AI Image Studio", theme=gr.themes.Soft()) as demo
         with gr.Column(scale=2):
             prompt = gr.Textbox(label="Describe your image", lines=5, placeholder="Cinematic portrait of an astronaut in a glowing rainforest…")
             negative = gr.Textbox(label="Negative prompt (SDXL Turbo only)", lines=2)
+            preset = gr.Dropdown(choices=list(PRESETS), value="Fast preview (SDXL Turbo)", label="Generation preset")
             model = gr.Dropdown(choices=["FLUX.1-schnell", "SDXL Turbo"], value="FLUX.1-schnell", label="Model")
             with gr.Row():
                 width = gr.Slider(256, 1536, value=1024, step=64, label="Width")
@@ -53,6 +55,8 @@ with gr.Blocks(title="HENAI · AI Image Studio", theme=gr.themes.Soft()) as demo
             download = gr.File(label="Download PNG")
             status = gr.Textbox(label="Generation details", interactive=False)
     gr.Markdown("**Hardware:** CUDA NVIDIA GPU required. FLUX may need substantial VRAM/RAM and disk. First generation downloads model weights. Review model licenses before commercial use.")
+    preset.change(lambda name: (lambda p: (p.model, p.width, p.height, p.steps, p.guidance))(get_preset(name)),
+                  inputs=preset, outputs=[model, width, height, steps, guidance])
     button.click(create_image, [prompt, negative, model, width, height, steps, guidance, seed],
                  [result, download, status], concurrency_limit=1)
 
